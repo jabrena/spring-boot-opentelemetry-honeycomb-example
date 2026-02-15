@@ -1,0 +1,60 @@
+services:
+  otel-collector:
+    image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:latest
+    container_name: otel-collector-honeycomb
+    command: ["--config=/etc/otelcol-contrib/config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otelcol-contrib/config.yaml
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "13133:13133" # Health check extension
+    environment:
+      - HONEYCOMB_API_KEY=${HONEYCOMB_API_KEY:-}
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.57
+    container_name: jaeger
+    ports:
+      - "16686:16686"  # Jaeger UI - OTLP ports only used internally by collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+
+  module-b:
+    build:
+      context: .
+      dockerfile: module-b/Dockerfile
+    container_name: module-b
+    ports:
+      - "8081:8080"   # Exposed for debugging; module-a uses internal network
+    depends_on:
+      - otel-collector
+    environment:
+      - spring.docker.compose.enabled=false
+      - OTEL_SERVICE_NAME=module-b
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      # Exclude OTLP exporter's internal POST from traces (agent instruments its own export)
+      - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
+      # OTLP HTTP exporter uses HttpURLConnection; disable to avoid tracing export calls
+      - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false
+
+  module-a:
+    build:
+      context: .
+      dockerfile: module-a/Dockerfile
+    container_name: module-a
+    ports:
+      - "8080:8080"   # Main entry point for curl
+    depends_on:
+      - module-b
+      - otel-collector
+    environment:
+      - spring.docker.compose.enabled=false
+      - OTEL_SERVICE_NAME=module-a
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      # Exclude OTLP exporter's internal POST from traces (agent instruments its own export)
+      - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
+      # OTLP HTTP exporter uses HttpURLConnection; disable to avoid tracing export calls
+      - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false

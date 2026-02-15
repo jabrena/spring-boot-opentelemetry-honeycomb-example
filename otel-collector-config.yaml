@@ -1,0 +1,39 @@
+# OpenTelemetry Collector config for local development with Jaeger
+# Receives OTLP from Spring Boot apps and forwards to Jaeger
+# For Honeycomb: add otlp/honeycomb exporter and set HONEYCOMB_API_KEY
+
+receivers:
+  otlp:
+    protocols:
+      grpc:
+        endpoint: 0.0.0.0:4317
+      http:
+        endpoint: 0.0.0.0:4318
+
+processors:
+  batch:
+    timeout: 1s
+
+exporters:
+  # Debug exporter - prints traces to collector logs
+  debug:
+    verbosity: detailed
+
+  # Jaeger OTLP exporter - local trace visualization
+  otlp/jaeger:
+    endpoint: "jaeger:4317"
+    tls:
+      insecure: true
+
+  # Uncomment and add to exporters list to send to Honeycomb (set HONEYCOMB_API_KEY):
+  # otlp/honeycomb:
+  #   endpoint: "api.honeycomb.io:443"
+  #   headers:
+  #     "x-honeycomb-team": "${env:HONEYCOMB_API_KEY}"
+
+service:
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [batch]
+      exporters: [debug, otlp/jaeger]
