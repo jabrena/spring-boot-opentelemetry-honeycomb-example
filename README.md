@@ -12,8 +12,13 @@ A multi-module Spring Boot POC demonstrating OpenTelemetry tracing with Honeycom
 ## Prerequisites
 
 - Docker and Docker Compose
-- Java 25 (for local Maven build)
+- Java 21+ (project uses Java 25 for local Maven build)
 - Maven 3.9+ (or use `./mvnw`)
+
+## Tech Stack
+
+- **Spring Boot 3.5.10**
+- **OpenTelemetry Spring Boot starter** (2.25.0) – zero-code tracing
 
 ## Run with Docker Compose
 
@@ -77,22 +82,22 @@ To run modules locally without Docker:
 2. Run module-b (in another terminal) on port 8081:
 
    ```bash
-   cd module-b && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081 --management.opentelemetry.tracing.export.otlp.endpoint=http://localhost:4318/v1/traces"
+   cd module-b && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
    ```
 
 3. Run module-a (in another terminal):
 
    ```bash
-   cd module-a && mvn spring-boot:run -Dspring-boot.run.arguments="--module-b.url=http://localhost:8081 --management.opentelemetry.tracing.export.otlp.endpoint=http://localhost:4318/v1/traces"
+   cd module-a && mvn spring-boot:run -Dspring-boot.run.arguments="--module-b.url=http://localhost:8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
    ```
 
-4. Use different ports for local runs: `module-b` with `server.port=8081`, and `module-a` with `module-b.url=http://localhost:8081`. OTLP should use `management.opentelemetry.tracing.export.otlp.endpoint=http://localhost:4318/v1/traces`.
+4. Use different ports for local runs: `module-b` with `server.port=8081`, and `module-a` with `module-b.url=http://localhost:8081`. OTLP should use `otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces`.
 
 ## Troubleshooting: No Traces in Jaeger
 
 If Jaeger shows "Service (0)" after calling the API:
 
-- **Spring Boot 4**: Use `management.opentelemetry.tracing.export.otlp.endpoint` (not `management.otlp.tracing.endpoint`).
+- **Spring Boot 3.5 + OpenTelemetry starter**: Use `otel.exporter.otlp.traces.endpoint` for OTLP trace export.
 - **Service name**: Set `otel.resource.attributes.service.name=module-a` (and module-b) so services appear correctly.
 - **Trace propagation**: Use `RestClient.Builder` (injected) instead of `RestClient.create()` so W3C Trace Context headers are propagated to module-b, creating a single distributed trace.
 - **Docker tracing**: Uses the OpenTelemetry Java Agent (`-javaagent`). Set `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `spring.docker.compose.enabled=false`, `OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false`, and `OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false` (to hide the agent's internal OTLP export POST span from traces).

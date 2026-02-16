@@ -7,9 +7,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
+	private final HelloService helloService;
+
+	public HelloController(HelloService helloService) {
+		this.helloService = helloService;
+	}
+
 	@GetMapping("/hello")
-	@WithSpan("generate-hello-response")
+	@WithSpan("generate-hello-response-from-module-b")
 	public String hello() {
-		return "hello world";
+		return helloService.getHelloMessage();
 	}
 }

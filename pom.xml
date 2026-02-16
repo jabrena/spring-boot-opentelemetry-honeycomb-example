@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>org.springframework.boot</groupId>
 		<artifactId>spring-boot-starter-parent</artifactId>
-		<version>4.0.2</version>
+		<version>3.5.10</version>
 		<relativePath/>
 	</parent>
 	<groupId>com.example</groupId>
@@ -22,5 +22,19 @@
 
 	<properties>
 		<java.version>25</java.version>
+		<opentelemetry-instrumentation.version>2.25.0</opentelemetry-instrumentation.version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- OpenTelemetry BOM must be imported before spring-boot for alignment -->
+			<dependency>
+				<groupId>io.opentelemetry.instrumentation</groupId>
+				<artifactId>opentelemetry-instrumentation-bom</artifactId>
+				<version>${opentelemetry-instrumentation.version}</version>
+				<type>pom</type>
+				<scope>import</scope>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 </project>
