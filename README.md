@@ -20,7 +20,7 @@ A multi-module Spring Boot POC demonstrating OpenTelemetry tracing with Honeycom
 Build and start all services:
 
 ```bash
-docker compose up --build
+docker compose up --build -d
 ```
 
 Or build the project first, then start:
