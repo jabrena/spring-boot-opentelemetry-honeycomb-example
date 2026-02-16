@@ -58,3 +58,5 @@ services:
       - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
       # OTLP HTTP exporter uses HttpURLConnection; disable to avoid tracing export calls
       - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false
+      # Disable Java HttpClient instrumentation to remove redundant "http get" span (custom @WithSpan covers RestClient calls)
+      - OTEL_INSTRUMENTATION_HTTP_CLIENT_ENABLED=false
