@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.example</groupId>
-		<artifactId>spring-boot-opentelemetry-honeycomb-example</artifactId>
+		<artifactId>sb35x</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>module-a</artifactId>
-	<name>module-a</name>
-	<description>Module A - calls module-b via RestClient</description>
+	<artifactId>module-b</artifactId>
+	<name>module-b</name>
+	<description>Module B - returns hello world</description>
 
 	<dependencies>
 		<dependency>
@@ -22,7 +22,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!-- RestClient is included in spring-boot-starter-web (since 3.2) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>

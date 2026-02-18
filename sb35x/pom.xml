@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<groupId>com.example</groupId>
+		<artifactId>spring-boot-opentelemetry-honeycomb-example</artifactId>
+		<version>0.0.1-SNAPSHOT</version>
+		<relativePath>../pom.xml</relativePath>
+	</parent>
+
+	<artifactId>sb35x</artifactId>
+	<packaging>pom</packaging>
+	<name>sb35x</name>
+	<description>Spring Boot 3.5.x modules aggregator</description>
+
+	<modules>
+		<module>module-a</module>
+		<module>module-b</module>
+	</modules>
+</project>

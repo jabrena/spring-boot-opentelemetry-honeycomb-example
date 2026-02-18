@@ -23,7 +23,7 @@ services:
   module-b:
     build:
       context: .
-      dockerfile: module-b/Dockerfile
+      dockerfile: sb35x/module-b/Dockerfile
     container_name: module-b
     ports:
       - "8081:8080"   # Exposed for debugging; module-a uses internal network
@@ -42,7 +42,7 @@ services:
   module-a:
     build:
       context: .
-      dockerfile: module-a/Dockerfile
+      dockerfile: sb35x/module-a/Dockerfile
     container_name: module-a
     ports:
       - "8080:8080"   # Main entry point for curl

@@ -16,8 +16,7 @@
 	<description>Demo project for Spring Boot with OpenTelemetry and Honeycomb</description>
 
 	<modules>
-		<module>module-a</module>
-		<module>module-b</module>
+		<module>sb35x</module>
 	</modules>
 
 	<properties>

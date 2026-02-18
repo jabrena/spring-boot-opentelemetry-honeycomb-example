@@ -4,6 +4,7 @@ A multi-module Spring Boot POC demonstrating OpenTelemetry tracing with Honeycom
 
 ## Architecture
 
+- **sb35x**: Maven aggregator module containing Spring Boot 3.5.x apps
 - **module-a**: REST service that calls module-b via RestClient
 - **module-b**: REST service returning "hello world"
 - **otel-collector**: Receives OTLP traces and forwards to Jaeger and Honeycomb
@@ -82,13 +83,13 @@ To run modules locally without Docker:
 2. Run module-b (in another terminal) on port 8081:
 
    ```bash
-   cd module-b && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
+   cd sb35x/module-b && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
    ```
 
 3. Run module-a (in another terminal):
 
    ```bash
-   cd module-a && mvn spring-boot:run -Dspring-boot.run.arguments="--module-b.url=http://localhost:8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
+   cd sb35x/module-a && mvn spring-boot:run -Dspring-boot.run.arguments="--module-b.url=http://localhost:8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
    ```
 
 4. Use different ports for local runs: `module-b` with `server.port=8081`, and `module-a` with `module-b.url=http://localhost:8081`. OTLP should use `otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces`.
