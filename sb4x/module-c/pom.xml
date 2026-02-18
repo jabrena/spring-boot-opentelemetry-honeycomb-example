@@ -4,14 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.example</groupId>
-		<artifactId>sb35x</artifactId>
+		<artifactId>sb4x</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>module-a</artifactId>
-	<name>module-a</name>
-	<description>Module A - calls module-b via RestClient</description>
+	<artifactId>module-c</artifactId>
+	<name>module-c</name>
+	<description>Module C - calls module-d via RestClient (Spring Boot 4)</description>
 
 	<dependencies>
 		<dependency>
@@ -22,12 +22,18 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 		</dependency>
-		<!-- RestClient is included in spring-boot-starter-web (since 3.2) -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-aop</artifactId>
+			<artifactId>spring-boot-starter-restclient</artifactId>
 		</dependency>
-		<!-- Use Java agent only for Docker (no opentelemetry-spring-boot-starter - they conflict); annotations for @WithSpan -->
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-aspectj</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-opentelemetry</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>io.opentelemetry.instrumentation</groupId>
 			<artifactId>opentelemetry-instrumentation-annotations</artifactId>

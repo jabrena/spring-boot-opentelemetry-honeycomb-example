@@ -1,0 +1,20 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Gateway
+
+Container_Boundary(gateway, "Gateway") {
+  Component(proxy_controller, "ProxyController", "Spring MVC Controller", "Routes /api/a to module-a root, /api/c to module-c root. Uses RestClient.")
+  Component(rest_client_a, "RestClient (module-a)", "RestClient", "HTTP client for module-a base URL")
+  Component(rest_client_c, "RestClient (module-c)", "RestClient", "HTTP client for module-c base URL")
+}
+
+Container(module_a, "Module A", "Spring Boot 3.5", "Upstream service")
+Container(module_c, "Module C", "Spring Boot 4", "Upstream service")
+
+Rel(proxy_controller, rest_client_a, "Uses")
+Rel(proxy_controller, rest_client_c, "Uses")
+Rel(rest_client_a, module_a, "GET /", "HTTP")
+Rel(rest_client_c, module_c, "GET /", "HTTP")
+
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Module D (sb4x)
+
+Container_Boundary(module_d, "Module D") {
+  Component(controller, "HelloController", "Spring MVC Controller", "GET /hello → HelloService")
+  Component(service, "HelloService", "Spring Service", "Returns 'hello world'")
+}
+
+Rel(controller, service, "Uses")
+
+@enduml

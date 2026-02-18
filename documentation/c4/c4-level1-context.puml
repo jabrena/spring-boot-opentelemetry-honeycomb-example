@@ -1,0 +1,17 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context — Spring Boot OpenTelemetry Demo
+
+Person(user, "User", "Calls API endpoints to test distributed tracing")
+System(demo, "Spring Boot OTel Demo", "Multi-module Spring Boot demo for OpenTelemetry tracing with Honeycomb/Jaeger. Returns hello world from downstream services via gateway.")
+System_Ext(otel_collector, "OTel Collector", "Receives OTLP traces from all services")
+System_Ext(jaeger, "Jaeger", "Visualizes traces")
+System_Ext(honeycomb, "Honeycomb", "Optional trace backend when HONEYCOMB_API_KEY is set")
+
+Rel(user, demo, "Uses", "HTTP/8084 - /api/a, /api/c")
+Rel(demo, otel_collector, "Sends traces", "OTLP HTTP/gRPC")
+Rel(otel_collector, jaeger, "Forwards traces", "OTLP")
+Rel(otel_collector, honeycomb, "Forwards traces (optional)", "OTLP")
+
+@enduml

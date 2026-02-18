@@ -1,106 +1,40 @@
 # Spring Boot OpenTelemetry Honeycomb Example
 
-A multi-module Spring Boot POC demonstrating OpenTelemetry tracing with Honeycomb and Jaeger. Module A calls Module B via RestClient; traces flow through the OpenTelemetry Collector to Jaeger (local) and optionally to Honeycomb (cloud).
+A multi-module Spring Boot POC demonstrating OpenTelemetry tracing with Honeycomb and Jaeger. Two stacks are available: **sb35x** (Spring Boot 3.5.x) with module-a calling module-b, and **sb4x** (Spring Boot 4.x) with module-c calling module-d. All traces flow through the OpenTelemetry Collector to Jaeger (local) and optionally to Honeycomb (cloud).
 
-## Architecture
+![](./documentation/c4/c4-level2-container.png)
 
-- **sb35x**: Maven aggregator module containing Spring Boot 3.5.x apps
-- **module-a**: REST service that calls module-b via RestClient
-- **module-b**: REST service returning "hello world"
-- **otel-collector**: Receives OTLP traces and forwards to Jaeger and Honeycomb
-- **jaeger**: Local trace visualization UI
+## How to run in local
 
-## Prerequisites
-
-- Docker and Docker Compose
-- Java 21+ (project uses Java 25 for local Maven build)
-- Maven 3.9+ (or use `./mvnw`)
-
-## Tech Stack
-
-- **Spring Boot 3.5.10**
-- **OpenTelemetry Spring Boot starter** (2.25.0) – zero-code tracing
-
-## Run with Docker Compose
-
-Build and start all services:
+Build and start all services (sb35x and sb4x):
 
 ```bash
 docker compose up --build -d
-```
-
-Or build the project first, then start:
-
-```bash
-mvn clean package -DskipTests
-docker compose up --build
+http://localhost:8084/swagger-ui.html
 ```
 
 Services will be available at:
 
-- **module-a**: http://localhost:8080
-- **module-b**: http://localhost:8081 (for debugging)
+- **gateway** (API Gateway): http://localhost:8084 – routes /api/a and /api/c
+- **Swagger UI (API docs)**: http://localhost:8084/swagger-ui.html
+- **module-a** (sb35x): http://localhost:8080
+- **module-b** (sb35x): http://localhost:8081 (for debugging)
+- **module-c** (sb4x): http://localhost:8082
+- **module-d** (sb4x): http://localhost:8083 (for debugging)
 - **Jaeger UI**: http://localhost:16686
 
-## Call Module A
+## Call the Services
 
-From your terminal:
-
-```bash
-curl http://localhost:8080/
-```
-
-Expected response: `hello world`
-
-## View Traces in Jaeger
-
-1. Open [http://localhost:16686](http://localhost:16686) in your browser.
-2. Select service `module-a` (or `module-b`) from the "Service" dropdown.
-3. Click **Find Traces**.
-4. Inspect a trace to see the distributed span: `module-a` HTTP request → `module-b` `/hello` span.
-
-## Optional: Send Traces to Honeycomb
-
-Uncomment the `otlp/honeycomb` exporter in `otel-collector-config.yaml`, add it to the traces pipeline, then:
+**Via API Gateway (recommended):**
 
 ```bash
-export HONEYCOMB_API_KEY=your-api-key-here
-docker compose up --build
+curl http://localhost:8084/api/a
+curl http://localhost:8084/api/c
 ```
 
-Get your API key from [Honeycomb](https://ui.honeycomb.io/account).
+**Automated test** (asserts both return `hello world`):
 
-## Local Development
-
-To run modules locally without Docker:
-
-1. Start the collector and Jaeger:
-
-   ```bash
-   docker compose up otel-collector jaeger
-   ```
-
-2. Run module-b (in another terminal) on port 8081:
-
-   ```bash
-   cd sb35x/module-b && mvn spring-boot:run -Dspring-boot.run.arguments="--server.port=8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
-   ```
-
-3. Run module-a (in another terminal):
-
-   ```bash
-   cd sb35x/module-a && mvn spring-boot:run -Dspring-boot.run.arguments="--module-b.url=http://localhost:8081 --otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces"
-   ```
-
-4. Use different ports for local runs: `module-b` with `server.port=8081`, and `module-a` with `module-b.url=http://localhost:8081`. OTLP should use `otel.exporter.otlp.traces.endpoint=http://localhost:4318/v1/traces`.
-
-## Troubleshooting: No Traces in Jaeger
-
-If Jaeger shows "Service (0)" after calling the API:
-
-- **Spring Boot 3.5 + OpenTelemetry starter**: Use `otel.exporter.otlp.traces.endpoint` for OTLP trace export.
-- **Service name**: Set `otel.resource.attributes.service.name=module-a` (and module-b) so services appear correctly.
-- **Trace propagation**: Use `RestClient.Builder` (injected) instead of `RestClient.create()` so W3C Trace Context headers are propagated to module-b, creating a single distributed trace.
-- **Docker tracing**: Uses the OpenTelemetry Java Agent (`-javaagent`). Set `OTEL_EXPORTER_OTLP_ENDPOINT`, `OTEL_SERVICE_NAME`, `spring.docker.compose.enabled=false`, `OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false`, and `OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false` (to hide the agent's internal OTLP export POST span from traces).
-- Ensure all services are running: `docker compose ps`
-- Check otel-collector logs: `docker compose logs otel-collector`
+```bash
+./test-gateway.sh          # assumes stack is already running
+./test-gateway.sh --up     # starts docker compose first, then tests
+```

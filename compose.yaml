@@ -60,3 +60,58 @@ services:
       - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false
       # Disable Java HttpClient instrumentation to remove redundant "http get" span (custom @WithSpan covers RestClient calls)
       - OTEL_INSTRUMENTATION_HTTP_CLIENT_ENABLED=false
+
+  module-d:
+    build:
+      context: .
+      dockerfile: sb4x/module-d/Dockerfile
+    container_name: module-d
+    ports:
+      - "8083:8080"   # Exposed for debugging; module-c uses internal network
+    depends_on:
+      - otel-collector
+    environment:
+      - spring.docker.compose.enabled=false
+      - OTEL_SERVICE_NAME=module-d
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
+      - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false
+
+  module-c:
+    build:
+      context: .
+      dockerfile: sb4x/module-c/Dockerfile
+    container_name: module-c
+    ports:
+      - "8082:8080"   # Spring Boot 4 entry point for curl
+    depends_on:
+      - module-d
+      - otel-collector
+    environment:
+      - spring.docker.compose.enabled=false
+      - OTEL_SERVICE_NAME=module-c
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
+      - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false
+      - OTEL_INSTRUMENTATION_HTTP_CLIENT_ENABLED=false
+
+  gateway:
+    build:
+      context: .
+      dockerfile: gateway/Dockerfile
+    container_name: gateway
+    ports:
+      - "8084:8084"   # API Gateway - Swagger UI at /swagger-ui.html, routes /api/a and /api/c
+    depends_on:
+      - module-a
+      - module-c
+      - otel-collector
+    environment:
+      - spring.docker.compose.enabled=false
+      - OTEL_SERVICE_NAME=gateway
+      - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4318
+      - OTEL_EXPORTER_OTLP_PROTOCOL=http/protobuf
+      - OTEL_INSTRUMENTATION_OKHTTP_ENABLED=false
+      - OTEL_INSTRUMENTATION_HTTP_URL_CONNECTION_ENABLED=false

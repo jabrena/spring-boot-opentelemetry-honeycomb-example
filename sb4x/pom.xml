@@ -9,14 +9,14 @@
 		<relativePath>../pom.xml</relativePath>
 	</parent>
 
-	<artifactId>sb35x</artifactId>
+	<artifactId>sb4x</artifactId>
 	<packaging>pom</packaging>
-	<name>sb35x</name>
-	<description>Spring Boot 3.5.x modules aggregator</description>
+	<name>sb4x</name>
+	<description>Spring Boot 4.x modules aggregator</description>
 
 	<properties>
 		<java.version>25</java.version>
-		<spring-boot.version>3.5.10</spring-boot.version>
+		<spring-boot.version>4.0.1</spring-boot.version>
 	</properties>
 
 	<build>
@@ -43,7 +43,7 @@
 			<dependency>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-dependencies</artifactId>
-				<version>3.5.10</version>
+				<version>${spring-boot.version}</version>
 				<type>pom</type>
 				<scope>import</scope>
 			</dependency>
@@ -51,7 +51,7 @@
 	</dependencyManagement>
 
 	<modules>
-		<module>module-a</module>
-		<module>module-b</module>
+		<module>module-c</module>
+		<module>module-d</module>
 	</modules>
 </project>

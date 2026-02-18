@@ -1,0 +1,16 @@
+spring:
+  application:
+    name: gateway
+
+server:
+  port: 8084
+
+# OpenTelemetry via Java agent (OTEL_* env vars in Docker)
+
+# OpenAPI / Swagger UI
+springdoc:
+  api-docs:
+    path: /v3/api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    url: /v3/api-docs

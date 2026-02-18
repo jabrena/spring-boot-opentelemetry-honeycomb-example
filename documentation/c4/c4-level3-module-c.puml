@@ -1,0 +1,18 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram — Module C (sb4x)
+
+Container_Boundary(module_c, "Module C") {
+  Component(controller, "ModuleCController", "Spring MVC Controller", "GET / → HelloAggregatorService")
+  Component(aggregator, "HelloAggregatorService", "Spring Service", "Aggregates hello from module-d via ModuleDClient")
+  Component(client, "ModuleDClient", "RestClient Component", "GET /hello from module-d")
+}
+
+Container(module_d, "Module D", "Spring Boot 4", "Downstream hello service")
+
+Rel(controller, aggregator, "Uses")
+Rel(aggregator, client, "Uses")
+Rel(client, module_d, "GET /hello", "HTTP")
+
+@enduml

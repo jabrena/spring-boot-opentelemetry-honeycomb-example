@@ -1,0 +1,28 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram — Spring Boot OpenTelemetry Demo
+
+Person(user, "User", "API consumer")
+System_Ext(otel_collector, "OTel Collector", "OTLP receiver")
+
+System_Boundary(demo, "Spring Boot OTel Demo") {
+  Container(gateway, "Gateway", "Spring Boot, RestClient, Swagger UI", "API gateway. Routes /api/a and /api/c to module-a and module-c. Port 8084.")
+  Container(module_a, "Module A", "Spring Boot 3.5.10", "Calls module-b. Port 8080.")
+  Container(module_b, "Module B", "Spring Boot 3.5.10", "Returns hello world via /hello. Port 8081.")
+  Container(module_c, "Module C", "Spring Boot 4.0.1", "Calls module-d. Port 8082.")
+  Container(module_d, "Module D", "Spring Boot 4.0.1", "Returns hello world via /hello. Port 8083.")
+}
+
+Rel(user, gateway, "Uses", "HTTP/8084")
+Rel(gateway, module_a, "Proxies /api/a", "HTTP")
+Rel(gateway, module_c, "Proxies /api/c", "HTTP")
+Rel(module_a, module_b, "Calls /hello", "HTTP")
+Rel(module_c, module_d, "Calls /hello", "HTTP")
+Rel(gateway, otel_collector, "Sends traces", "OTLP")
+Rel(module_a, otel_collector, "Sends traces", "OTLP")
+Rel(module_b, otel_collector, "Sends traces", "OTLP")
+Rel(module_c, otel_collector, "Sends traces", "OTLP")
+Rel(module_d, otel_collector, "Sends traces", "OTLP")
+
+@enduml
