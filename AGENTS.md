@@ -55,6 +55,7 @@ After any code or Docker changes, run the integration test:
 - Assumes the stack is already running (e.g. `docker compose up -d`).
 - Waits for the gateway, then calls `/api/a` and `/api/c`.
 - Asserts both return exactly `hello world`.
+- Verifies traces reach the OTEL collector (via Jaeger query API for gateway, module-a, module-c).
 - Exit 0 = pass, exit 1 = fail.
 
 **Start stack and test in one step:**
@@ -86,7 +87,7 @@ curl http://localhost:8084/api/c   # expect "hello world"
 
 | File | Purpose |
 |------|---------|
-| `gateway/src/main/java/.../ProxyController.java` | Routes /api/a, /api/c |
+| `gateway/src/main/resources/application.yml` | Gateway routes (Spring Cloud Gateway MVC) |
 | `sb35x/module-a/.../ModuleBClient.java` | RestClient call to module-b |
 | `sb4x/module-c/.../ModuleDClient.java` | RestClient call to module-d |
 | `sb35x/module-b/.../HelloController.java` | /hello → "hello world" |

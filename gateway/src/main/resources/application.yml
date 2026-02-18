@@ -1,6 +1,22 @@
 spring:
   application:
     name: gateway
+  cloud:
+    gateway:
+      mvc:
+        routes:
+          - id: module-a
+            uri: http://module-a:8080
+            predicates:
+              - Path=/api/a,/api/a/**
+            filters:
+              - SetPath=/
+          - id: module-c
+            uri: http://module-c:8080
+            predicates:
+              - Path=/api/c,/api/c/**
+            filters:
+              - SetPath=/
 
 server:
   port: 8084

@@ -1,12 +1,15 @@
 #!/usr/bin/env bash
 # Test gateway /api/a and /api/c endpoints – assert both return "hello world"
+# and verify traces reach the OTEL collector (via Jaeger).
 # Usage: ./test-gateway.sh [--up]   (use --up to start docker compose first)
 
 set -e
 
 GATEWAY_URL="${GATEWAY_URL:-http://localhost:8084}"
+JAEGER_URL="${JAEGER_URL:-http://localhost:16686}"
 MAX_WAIT=60
 INTERVAL=3
+TRACE_WAIT=5
 
 if [[ "$1" == "--up" ]]; then
   echo "Starting Docker Compose..."
@@ -43,6 +46,33 @@ if [[ "$RESP_C" != "hello world" ]]; then
   exit 1
 fi
 echo "PASS: /api/c returns hello world"
+
+echo ""
+echo "=== Test traces in OTEL collector (via Jaeger) ==="
+echo "Waiting ${TRACE_WAIT}s for traces to propagate..."
+sleep "$TRACE_WAIT"
+
+# Query Jaeger for traces from our services (collector forwards to Jaeger)
+SERVICES=("gateway" "module-a" "module-c")
+for svc in "${SERVICES[@]}"; do
+  TRACES=$(curl -sf "${JAEGER_URL}/api/traces?service=${svc}&limit=1&lookback=5m" 2>/dev/null || echo "{}")
+  if command -v jq &>/dev/null; then
+    COUNT=$(echo "$TRACES" | jq -r '.data | length // 0')
+  else
+    # Fallback: check if response contains trace data (has "traceID" or "spans")
+    COUNT=0
+    if [[ "$TRACES" == *"traceID"* ]] || [[ "$TRACES" == *"spans"* ]]; then
+      COUNT=1
+    fi
+  fi
+  if [[ "$COUNT" -gt 0 ]] || [[ "$TRACES" == *"traceID"* ]]; then
+    echo "PASS: traces found for service ${svc}"
+  else
+    echo "FAIL: no traces found for service ${svc} (OTEL collector -> Jaeger pipeline)"
+    echo "  Response: ${TRACES:0:200}..."
+    exit 1
+  fi
+done
 
 echo ""
 echo "All tests passed."
